@@ -26,7 +26,7 @@ namespace OzzysWhackAMole
                 //Using mouse input to detect touchscreen controls for now
                 if (Input.GetMouseButtonDown(0))
                 {
-                    //Sending out player controls through raycast
+                    //Sending out player controls to moles through raycast
                     RaycastHit hit;
                     var raycast = PlayerViewport.ScreenPointToRay(Input.mousePosition);
                     if (Physics.Raycast(raycast, out hit))
