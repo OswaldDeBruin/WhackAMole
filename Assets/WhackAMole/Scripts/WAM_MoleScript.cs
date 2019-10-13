@@ -16,6 +16,8 @@ namespace OzzysWhackAMole
         public Vector3 UpLocalPosition = Vector3.zero;//Upper position of the mole object
         public WAM_GameManager myGameManager;//Game manager to communicate to if the mole has been hit
         float stateStartTime = 0;//Time of the first frame of a state
+        public AudioSource OnHitAudioSource;//Sound to play when hit
+        public ParticleSystem OnHitParticleSystem;//Particle to play when mole is hit
 
         //This function sets the position of the mole object
         void MoveMole(Vector3 position)
@@ -66,6 +68,8 @@ namespace OzzysWhackAMole
             if (myState== MoleState.inUp || myState == MoleState.movingUp)
             {
                 CommunicateScoreHit();
+                if (OnHitAudioSource != null) OnHitAudioSource.Play();
+                if (OnHitParticleSystem != null) OnHitParticleSystem.Play();
                 MoveMoleDown();
             }
         }
