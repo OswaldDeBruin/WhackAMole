@@ -12,6 +12,7 @@ namespace OzzysWhackAMole
         WAM_MenuScreen CurrentMenuScreen;//The current machine state or menu screen
 
         public WAM_GameManager WAMGame;//The game manager the menu manages
+        public AudioSource MusicPlayer;//Music source
 
         //Class used for menu states
         [System.Serializable]
@@ -19,6 +20,7 @@ namespace OzzysWhackAMole
         {
             public WAM_MenuScreen MenuScreen;//state we want to attach these elements to
             public List<GameObject> screenComponents = new List<GameObject>();//The screen components we want to see on a menu screen
+            public AudioClip SwitchMusicTo;//Music clip to switch to when navigating to this menu screen
             //Managing function that handles turning on or off for us
             public void TurnOnOff(bool TurnOn)
             {
@@ -30,6 +32,14 @@ namespace OzzysWhackAMole
             }
         }
         public List<menuSet> MenuScreens = new List<menuSet>();//All menu screen states we want to be able to navigate to
+
+        private void SwitchMusic(AudioClip clip)
+        {
+            //Only play if we have a player, a new clip and we are not already playing that clip
+            if (MusicPlayer == null || clip == null || MusicPlayer.clip == clip) return;
+            MusicPlayer.clip = clip;
+            MusicPlayer.Play();
+        }
 
         //This function handles navigation from and to a menu state
         public void GotoMenu(WAM_MenuScreen goHere)
@@ -43,6 +53,7 @@ namespace OzzysWhackAMole
                     if (it != null) it.TurnOnOff(false);
                 }
                 newMenuSet.TurnOnOff(true);//Turn the navigatable menu screen elements on
+                SwitchMusic(newMenuSet.SwitchMusicTo);
                 CurrentMenuScreen = goHere;//Remember we are now in this state
             }
         }
