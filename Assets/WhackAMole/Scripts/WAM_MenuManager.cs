@@ -13,7 +13,7 @@ namespace OzzysWhackAMole
 
         public WAM_GameManager WAMGame;//The game manager the menu manages
         public AudioSource MusicPlayer;//Music source
-        public WAM_Utils.CameraRotatingDirector CameraRotator; 
+        public WAM_Utils.CameraRotatingDirector CameraRotator;//Pointer to a script that handles the camera rotation for us
 
         //Class used for menu states
         [System.Serializable]
@@ -56,19 +56,19 @@ namespace OzzysWhackAMole
                     if (it != null) it.TurnOnOff(false);
                 }
                 newMenuSet.TurnOnOff(true);//Turn the navigatable menu screen elements on
-                SwitchMusic(newMenuSet.SwitchMusicTo);
-                if (newMenuSet.RotateCamera && CameraRotator != null)
+                SwitchMusic(newMenuSet.SwitchMusicTo);//Switch to the right music
+                if (newMenuSet.RotateCamera && CameraRotator != null)//If the menuscreen wants the camera at a different angle and we control a camera
                 {
-                    if (CameraTeleportation)
+                    if (CameraTeleportation)//If we do not want an animation (for example, if we are in the first screen)
                     {
-                        CameraRotator.InstantRotateTo(newMenuSet.CameraRotateEulerAngle);
+                        CameraRotator.InstantRotateTo(newMenuSet.CameraRotateEulerAngle);//We snap the camera to its position
                     }
                     else
                     { 
-                        CameraRotator.RotateTo(newMenuSet.CameraRotateEulerAngle);
+                        CameraRotator.RotateTo(newMenuSet.CameraRotateEulerAngle);//Else, we tell the camera script to animate to an angle
                     }
                 }
-                CurrentMenuScreen = goHere;//Remember we are now in this state
+                CurrentMenuScreen = goHere;//Remember we are now in this menu state
             }
         }
 
