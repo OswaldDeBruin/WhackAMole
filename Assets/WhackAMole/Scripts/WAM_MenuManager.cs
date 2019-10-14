@@ -7,12 +7,13 @@ namespace OzzysWhackAMole
     //Main menu made out of a simple state machine
     public class WAM_MenuManager : MonoBehaviour
     {
-        public enum WAM_MenuScreen { MainMenu, Game, Score };//Machine states which correspond to menu screens
+        public enum WAM_MenuScreen { MainMenu, GetReady, Game, Score };//Machine states which correspond to menu screens
         public WAM_MenuScreen startScreen = WAM_MenuScreen.MainMenu;//The first screen we want to see on startup
         WAM_MenuScreen CurrentMenuScreen;//The current machine state or menu screen
 
         public WAM_GameManager WAMGame;//The game manager the menu manages
         public AudioSource MusicPlayer;//Music source
+        public WAM_Utils.CameraRotatingDirector CameraRotator; 
 
         //Class used for menu states
         [System.Serializable]
@@ -21,6 +22,8 @@ namespace OzzysWhackAMole
             public WAM_MenuScreen MenuScreen;//state we want to attach these elements to
             public List<GameObject> screenComponents = new List<GameObject>();//The screen components we want to see on a menu screen
             public AudioClip SwitchMusicTo;//Music clip to switch to when navigating to this menu screen
+            public bool RotateCamera = false;
+            public Vector3 CameraRotateEulerAngle = Vector3.zero;
             //Managing function that handles turning on or off for us
             public void TurnOnOff(bool TurnOn)
             {
@@ -42,7 +45,7 @@ namespace OzzysWhackAMole
         }
 
         //This function handles navigation from and to a menu state
-        public void GotoMenu(WAM_MenuScreen goHere)
+        public void GotoMenu(WAM_MenuScreen goHere, bool CameraTeleportation = false)
         {
             if (MenuScreens == null) return;
             var newMenuSet = MenuScreens.Find(X => X.MenuScreen == goHere);//Find the menu state to got to
@@ -54,6 +57,17 @@ namespace OzzysWhackAMole
                 }
                 newMenuSet.TurnOnOff(true);//Turn the navigatable menu screen elements on
                 SwitchMusic(newMenuSet.SwitchMusicTo);
+                if (newMenuSet.RotateCamera && CameraRotator != null)
+                {
+                    if (CameraTeleportation)
+                    {
+                        CameraRotator.InstantRotateTo(newMenuSet.CameraRotateEulerAngle);
+                    }
+                    else
+                    { 
+                        CameraRotator.RotateTo(newMenuSet.CameraRotateEulerAngle);
+                    }
+                }
                 CurrentMenuScreen = goHere;//Remember we are now in this state
             }
         }
@@ -64,19 +78,26 @@ namespace OzzysWhackAMole
             GotoMenu(WAM_MenuScreen.MainMenu);
         }
 
+        float stateStartTime = 0;
+
+        private float PassedTimeInState()
+        {
+            return Time.time - stateStartTime;
+        }
+
         //void function to let button start the game
         public void StartGame()
         {
             if (WAMGame != null)
             {
-                WAMGame.StartGame();
-                GotoMenu(WAM_MenuScreen.Game);
+                stateStartTime = Time.time;
+                GotoMenu(WAM_MenuScreen.GetReady);
             }
         }
 
         void Start()
         {
-            GotoMenu(startScreen);//Menu initialisation
+            GotoMenu(startScreen, true);//Menu initialisation
         }
 
         void Update()
@@ -88,6 +109,13 @@ namespace OzzysWhackAMole
                     if (WAMGame == null || !WAMGame.isPlaying())
                     {
                         GotoMenu(WAM_MenuScreen.Score);
+                    }
+                    break;
+                case WAM_MenuScreen.GetReady:
+                    if (PassedTimeInState() >= 3)
+                    {
+                        WAMGame.StartGame();
+                        GotoMenu(WAM_MenuScreen.Game);
                     }
                     break;
                 default:
